@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@apollo/client": "^3.8.8",
+    "@react-google-maps/api": "^2.19.2",
+    "d3-force": "^3.0.0",
     "graphql": "^16.8.1",
     "next": "14.0.4",
     "react": "^18.2.0",
@@ -21,6 +23,7 @@
     "tailwind-merge": "^2.2.0"
   },
   "devDependencies": {
+    "@types/d3-force": "^3.0.9",
     "@graphql-codegen/cli": "^5.0.0",
     "@graphql-codegen/client-preset": "^4.1.0",
     "@graphql-codegen/typescript": "^4.0.1",

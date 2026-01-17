@@ -2,9 +2,10 @@
 
 import { useMutation } from "@apollo/client";
 import { Button, Input, Textarea, TagInput } from "@/components/ui";
+import { CityAutocomplete } from "@/components/map";
 import { UPDATE_PERSON, DELETE_PERSON, SET_AS_ME } from "@/lib/graphql/mutations";
 import { GET_GRAPH, GET_PEOPLE } from "@/lib/graphql/queries";
-import { getDegreeColor, getTrustColor } from "@/lib/utils";
+import { getDegreeColor, getTrustColor, getTrustLabel } from "@/lib/utils";
 import { useState } from "react";
 
 interface Person {
@@ -16,6 +17,9 @@ interface Person {
   seeks?: string;
   isUser: boolean;
   degree?: number;
+  city?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 interface Connection {
@@ -45,7 +49,28 @@ export function PersonPanel({
     tags: person.tags,
     offers: person.offers || "",
     seeks: person.seeks || "",
+    city: person.city || "",
+    latitude: person.latitude || null,
+    longitude: person.longitude || null,
   });
+
+  const handleLocationChange = (location: { city: string; latitude: number; longitude: number } | null) => {
+    if (location) {
+      setFormData({
+        ...formData,
+        city: location.city,
+        latitude: location.latitude,
+        longitude: location.longitude,
+      });
+    } else {
+      setFormData({
+        ...formData,
+        city: "",
+        latitude: null,
+        longitude: null,
+      });
+    }
+  };
 
   const [updatePerson, { loading: updating }] = useMutation(UPDATE_PERSON, {
     refetchQueries: [GET_GRAPH, GET_PEOPLE],
@@ -85,20 +110,23 @@ export function PersonPanel({
   const degreeLabel = person.degree === 0 ? "You" : person.degree === 1 ? "1st degree" : "2nd degree";
 
   return (
-    <div className="h-full flex flex-col bg-surface-elevated border-l border-border animate-slide-in">
+    <div className="h-full flex flex-col bg-surface-elevated/95 backdrop-blur-xl border-l border-border slide-up">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-        <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+        <div className="flex items-center gap-4">
           <div
-            className="w-10 h-10 rounded-full flex items-center justify-center font-mono font-bold text-background"
-            style={{ backgroundColor: getDegreeColor(person.degree || 0) }}
+            className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-background text-lg avatar-bimoi"
+            style={{ 
+              backgroundColor: getDegreeColor(person.degree || 0),
+              boxShadow: `0 0 20px ${getDegreeColor(person.degree || 0)}40`
+            }}
           >
             {person.name.slice(0, 2).toUpperCase()}
           </div>
           <div>
-            <h2 className="font-semibold text-text-primary">{person.name}</h2>
+            <h2 className="font-semibold text-text-primary text-lg">{person.name}</h2>
             <span
-              className="text-xs font-mono px-1.5 py-0.5 rounded"
+              className="text-xs font-semibold px-2.5 py-1 rounded-full"
               style={{
                 color: getDegreeColor(person.degree || 0),
                 backgroundColor: `${getDegreeColor(person.degree || 0)}20`,
@@ -110,9 +138,9 @@ export function PersonPanel({
         </div>
         <button
           onClick={onClose}
-          className="p-2 text-text-muted hover:text-text-primary hover:bg-surface rounded-lg transition-colors"
+          className="p-2 text-text-muted hover:text-bimoi-magenta hover:bg-surface rounded-full transition-all duration-200 hover:rotate-90"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <line x1="18" y1="6" x2="6" y2="18" />
             <line x1="6" y1="6" x2="18" y2="18" />
           </svg>
@@ -120,10 +148,10 @@ export function PersonPanel({
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-5 space-y-5">
         {isEditing ? (
           /* Edit Mode */
-          <div className="space-y-4">
+          <div className="space-y-5">
             <Input
               label="Name"
               value={formData.name}
@@ -155,25 +183,31 @@ export function PersonPanel({
               rows={2}
               placeholder="What are they looking for?"
             />
+            <CityAutocomplete
+              label="Location"
+              value={formData.city}
+              onChange={handleLocationChange}
+              placeholder="Search for their city..."
+            />
           </div>
         ) : (
           /* View Mode */
           <>
             {person.bio && (
-              <div>
-                <h3 className="text-xs font-medium text-text-muted uppercase tracking-wide mb-1">Bio</h3>
-                <p className="text-text-secondary text-sm">{person.bio}</p>
+              <div className="card-bimoi p-4">
+                <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">Bio</h3>
+                <p className="text-text-secondary text-sm leading-relaxed">{person.bio}</p>
               </div>
             )}
 
             {person.tags.length > 0 && (
               <div>
-                <h3 className="text-xs font-medium text-text-muted uppercase tracking-wide mb-2">Tags</h3>
-                <div className="flex flex-wrap gap-1.5">
+                <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-3">Tags</h3>
+                <div className="flex flex-wrap gap-2">
                   {person.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="px-2 py-0.5 bg-surface text-text-secondary text-xs rounded-md border border-border"
+                      className="tag-bimoi"
                     >
                       {tag}
                     </span>
@@ -183,59 +217,87 @@ export function PersonPanel({
             )}
 
             {person.offers && (
-              <div>
-                <h3 className="text-xs font-medium text-text-muted uppercase tracking-wide mb-1">Offers</h3>
-                <p className="text-text-secondary text-sm">{person.offers}</p>
+              <div className="card-bimoi p-4">
+                <h3 className="text-xs font-semibold text-bimoi-gold uppercase tracking-wider mb-2">✦ Offers</h3>
+                <p className="text-text-secondary text-sm leading-relaxed">{person.offers}</p>
               </div>
             )}
 
             {person.seeks && (
-              <div>
-                <h3 className="text-xs font-medium text-text-muted uppercase tracking-wide mb-1">Seeks</h3>
-                <p className="text-text-secondary text-sm">{person.seeks}</p>
+              <div className="card-bimoi p-4">
+                <h3 className="text-xs font-semibold text-bimoi-purple uppercase tracking-wider mb-2">◆ Seeks</h3>
+                <p className="text-text-secondary text-sm leading-relaxed">{person.seeks}</p>
+              </div>
+            )}
+
+            {person.city && (
+              <div className="card-bimoi p-4">
+                <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                    <circle cx="12" cy="10" r="3" />
+                  </svg>
+                  Location
+                </h3>
+                <p className="text-text-secondary text-sm">{person.city}</p>
               </div>
             )}
 
             {/* Connection info (if viewing a connection) */}
             {connection && (
-              <div className="pt-4 border-t border-border space-y-3">
-                <h3 className="text-xs font-medium text-text-muted uppercase tracking-wide">Connection</h3>
+              <div className="pt-5 border-t border-border space-y-4">
+                <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider">Connection</h3>
                 
-                <div className="flex items-center gap-2">
-                  <span className="text-text-secondary text-sm">Trust:</span>
-                  <div className="flex gap-1">
+                <div className="card-bimoi p-4 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-text-secondary text-sm font-medium">Trust Level</span>
+                    <span
+                      className="text-sm font-semibold px-3 py-1 rounded-full"
+                      style={{ 
+                        color: getTrustColor(connection.trustLevel), 
+                        backgroundColor: `${getTrustColor(connection.trustLevel)}20`
+                      }}
+                    >
+                      {connection.trustLevel}/5 · {getTrustLabel(connection.trustLevel)}
+                    </span>
+                  </div>
+                  
+                  <div className="flex gap-1.5">
                     {[1, 2, 3, 4, 5].map((level) => (
                       <div
                         key={level}
-                        className="w-4 h-4 rounded"
+                        className="flex-1 h-3 rounded-full transition-all duration-300"
                         style={{
                           backgroundColor:
                             level <= connection.trustLevel
                               ? getTrustColor(level)
                               : "#2a2a3a",
+                          boxShadow: level <= connection.trustLevel 
+                            ? `0 2px 8px ${getTrustColor(level)}40` 
+                            : "none"
                         }}
                       />
                     ))}
                   </div>
+
+                  {connection.context && (
+                    <div>
+                      <span className="text-text-muted text-xs font-medium">Context</span>
+                      <p className="text-text-primary text-sm mt-1">{connection.context}</p>
+                    </div>
+                  )}
+
+                  {connection.since && (
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-text-muted font-medium">Since</span>
+                      <span className="text-text-primary font-mono">
+                        {new Date(connection.since).toLocaleDateString()}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
-                {connection.context && (
-                  <div>
-                    <span className="text-text-secondary text-sm">Context: </span>
-                    <span className="text-text-primary text-sm">{connection.context}</span>
-                  </div>
-                )}
-
-                {connection.since && (
-                  <div>
-                    <span className="text-text-secondary text-sm">Since: </span>
-                    <span className="text-text-primary text-sm font-mono">
-                      {new Date(connection.since).toLocaleDateString()}
-                    </span>
-                  </div>
-                )}
-
-                <Button size="sm" variant="secondary" onClick={onEditConnection}>
+                <Button size="sm" variant="outline" onClick={onEditConnection} className="w-full">
                   Edit Connection
                 </Button>
               </div>
@@ -245,9 +307,9 @@ export function PersonPanel({
       </div>
 
       {/* Footer Actions */}
-      <div className="p-4 border-t border-border space-y-2">
+      <div className="p-5 border-t border-border space-y-3">
         {isEditing ? (
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             <Button
               variant="secondary"
               className="flex-1"
@@ -256,20 +318,20 @@ export function PersonPanel({
               Cancel
             </Button>
             <Button className="flex-1" onClick={handleSave} disabled={updating}>
-              {updating ? "Saving..." : "Save"}
+              {updating ? "Saving..." : "Save Changes"}
             </Button>
           </div>
         ) : (
           <>
-            <Button variant="secondary" className="w-full" onClick={() => setIsEditing(true)}>
+            <Button variant="outline" className="w-full" onClick={() => setIsEditing(true)}>
               Edit Profile
             </Button>
             {!person.isUser && (
-              <div className="flex gap-2">
+              <div className="flex gap-3">
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="flex-1 text-text-muted"
+                  className="flex-1 text-text-muted hover:text-bimoi-gold"
                   onClick={handleSetAsMe}
                 >
                   Set as Me
@@ -277,7 +339,7 @@ export function PersonPanel({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="flex-1 text-red-500 hover:text-red-400"
+                  className="flex-1 text-red-400 hover:text-red-300 hover:bg-red-500/10"
                   onClick={handleDelete}
                   disabled={deleting}
                 >

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useMutation } from "@apollo/client";
 import { Button, Input, Textarea, TagInput, Modal } from "@/components/ui";
+import { CityAutocomplete } from "@/components/map";
 import { CREATE_PERSON } from "@/lib/graphql/mutations";
 import { GET_GRAPH, GET_PEOPLE } from "@/lib/graphql/queries";
 
@@ -19,6 +20,9 @@ export function PersonForm({ isOpen, onClose, onCreated }: PersonFormProps) {
     tags: [] as string[],
     offers: "",
     seeks: "",
+    city: "",
+    latitude: null as number | null,
+    longitude: null as number | null,
   });
 
   const [createPerson, { loading }] = useMutation(CREATE_PERSON, {
@@ -37,7 +41,28 @@ export function PersonForm({ isOpen, onClose, onCreated }: PersonFormProps) {
       tags: [],
       offers: "",
       seeks: "",
+      city: "",
+      latitude: null,
+      longitude: null,
     });
+  };
+
+  const handleLocationChange = (location: { city: string; latitude: number; longitude: number } | null) => {
+    if (location) {
+      setFormData({
+        ...formData,
+        city: location.city,
+        latitude: location.latitude,
+        longitude: location.longitude,
+      });
+    } else {
+      setFormData({
+        ...formData,
+        city: "",
+        latitude: null,
+        longitude: null,
+      });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -92,6 +117,13 @@ export function PersonForm({ isOpen, onClose, onCreated }: PersonFormProps) {
           onChange={(e) => setFormData({ ...formData, seeks: e.target.value })}
           rows={2}
           placeholder="What are they looking for?"
+        />
+
+        <CityAutocomplete
+          label="Location"
+          value={formData.city}
+          onChange={handleLocationChange}
+          placeholder="Search for their city..."
         />
         
         <div className="flex gap-3 pt-2">

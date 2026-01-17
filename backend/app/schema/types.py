@@ -13,6 +13,10 @@ class Person:
     seeks: Optional[str] = None
     is_user: bool = False
     created_at: datetime = strawberry.field(default_factory=datetime.now)
+    # Location fields for map view
+    city: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
 
 
 @strawberry.type
@@ -41,6 +45,10 @@ class PersonNode:
     tags: list[str]
     is_user: bool
     degree: int  # 0 = user, 1 = first-degree, 2 = second-degree
+    # Location for map view
+    city: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
 
 
 @strawberry.type
@@ -68,6 +76,9 @@ class PersonInput:
     tags: list[str] = strawberry.field(default_factory=list)
     offers: Optional[str] = None
     seeks: Optional[str] = None
+    city: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
 
 
 @strawberry.input

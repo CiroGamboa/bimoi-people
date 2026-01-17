@@ -11,6 +11,9 @@ export const GET_ME = gql`
       seeks
       isUser
       createdAt
+      city
+      latitude
+      longitude
     }
   }
 `;
@@ -26,6 +29,9 @@ export const GET_PERSON = gql`
       seeks
       isUser
       createdAt
+      city
+      latitude
+      longitude
     }
   }
 `;
@@ -41,6 +47,9 @@ export const GET_PEOPLE = gql`
       seeks
       isUser
       createdAt
+      city
+      latitude
+      longitude
     }
   }
 `;
@@ -54,6 +63,9 @@ export const GET_GRAPH = gql`
         tags
         isUser
         degree
+        city
+        latitude
+        longitude
       }
       edges {
         id

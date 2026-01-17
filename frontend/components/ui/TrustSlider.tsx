@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { getTrustColor } from "@/lib/utils";
+import { getTrustColor, getTrustLabel } from "@/lib/utils";
 
 interface TrustSliderProps {
   value: number;
@@ -9,20 +9,22 @@ interface TrustSliderProps {
   className?: string;
 }
 
-const trustLabels = ["Low", "Casual", "Good", "Strong", "Deep"];
-
 export function TrustSlider({ value, onChange, className }: TrustSliderProps) {
   return (
-    <div className={cn("space-y-2", className)}>
+    <div className={cn("space-y-3", className)}>
       <div className="flex justify-between items-center">
         <label className="block text-sm font-medium text-text-secondary">
           Trust Level
         </label>
         <span
-          className="text-sm font-mono font-medium px-2 py-0.5 rounded"
-          style={{ color: getTrustColor(value), backgroundColor: `${getTrustColor(value)}20` }}
+          className="text-sm font-semibold px-3 py-1 rounded-full transition-all duration-300"
+          style={{ 
+            color: getTrustColor(value), 
+            backgroundColor: `${getTrustColor(value)}20`,
+            boxShadow: `0 0 10px ${getTrustColor(value)}30`
+          }}
         >
-          {value}/5 - {trustLabels[value - 1]}
+          {value}/5 · {getTrustLabel(value)}
         </span>
       </div>
       
@@ -33,16 +35,26 @@ export function TrustSlider({ value, onChange, className }: TrustSliderProps) {
             type="button"
             onClick={() => onChange(level)}
             className={cn(
-              "flex-1 h-10 rounded-lg transition-all duration-200 border-2",
+              "flex-1 h-12 rounded-xl transition-all duration-300 border-2 relative overflow-hidden",
               level <= value
-                ? "border-transparent"
-                : "border-border hover:border-text-muted"
+                ? "border-transparent scale-100"
+                : "border-border hover:border-text-muted scale-95 hover:scale-100"
             )}
             style={{
               backgroundColor: level <= value ? getTrustColor(level) : "transparent",
+              boxShadow: level <= value ? `0 4px 15px ${getTrustColor(level)}40` : "none",
             }}
-          />
+          >
+            {level <= value && (
+              <span className="absolute inset-0 bg-white/10 animate-pulse" />
+            )}
+          </button>
         ))}
+      </div>
+      
+      <div className="flex justify-between text-xs text-text-muted font-medium">
+        <span>Low</span>
+        <span>Deep</span>
       </div>
     </div>
   );

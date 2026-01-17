@@ -1,26 +1,39 @@
 "use client";
 
+import Image from "next/image";
 import { Button } from "@/components/ui";
+import { ViewToggle, ViewMode } from "@/components/ViewToggle";
 
 interface HeaderProps {
   onAddPerson: () => void;
+  viewMode: ViewMode;
+  onViewModeChange: (mode: ViewMode) => void;
 }
 
-export function Header({ onAddPerson }: HeaderProps) {
+export function Header({ onAddPerson, viewMode, onViewModeChange }: HeaderProps) {
   return (
-    <header className="flex items-center justify-between px-6 py-4 border-b border-border bg-surface/50 backdrop-blur-sm">
+    <header className="flex items-center justify-between px-6 py-4 border-b border-border bg-surface/80 backdrop-blur-xl">
       <div className="flex items-center gap-3">
-        {/* Logo */}
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent-primary to-accent-secondary flex items-center justify-center">
-          <span className="text-background font-bold text-sm">B</span>
-        </div>
+        {/* Bimoi Logo */}
+        <Image
+          src="/bimoi-logo.svg"
+          alt="Bimoi"
+          width={40}
+          height={40}
+          className="w-10 h-10"
+        />
         <div>
-          <h1 className="text-lg font-semibold text-text-primary">Bimoi</h1>
-          <p className="text-xs text-text-muted">Personal Social Graph</p>
+          <h1 className="text-xl font-semibold text-bimoi-gradient">
+            Bimoi
+          </h1>
+          <p className="text-xs text-text-muted font-medium">
+            Personal Social Graph
+          </p>
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-4">
+        <ViewToggle value={viewMode} onChange={onViewModeChange} />
         <Button onClick={onAddPerson} size="sm">
           <svg
             xmlns="http://www.w3.org/2000/svg"

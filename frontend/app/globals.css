@@ -2,68 +2,58 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Poppins Font - Bimoi Brand Font */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* JetBrains Mono for monospace elements */
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
 
-/* Geist font - loaded from Vercel */
-@font-face {
-  font-family: 'Geist';
-  src: url('https://assets.vercel.com/raw/upload/v1669297165/fonts/geist/Geist-Regular.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Geist';
-  src: url('https://assets.vercel.com/raw/upload/v1669297165/fonts/geist/Geist-Medium.woff2') format('woff2');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Geist';
-  src: url('https://assets.vercel.com/raw/upload/v1669297165/fonts/geist/Geist-SemiBold.woff2') format('woff2');
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Geist';
-  src: url('https://assets.vercel.com/raw/upload/v1669297165/fonts/geist/Geist-Bold.woff2') format('woff2');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
+:root {
+  /* Bimoi Brand Colors */
+  --bimoi-magenta: #B41F66;
+  --bimoi-orange: #DF5738;
+  --bimoi-gold: #FFB714;
+  --bimoi-purple: #78307D;
+  
+  /* Gradients */
+  --bimoi-gradient: linear-gradient(135deg, #B41F66 0%, #DF5738 50%, #FFB714 100%);
+  --bimoi-gradient-button: linear-gradient(149deg, rgba(188,40,146,1) 32%, rgba(224,43,129,1) 67%);
+  --bimoi-gradient-dark: linear-gradient(180deg, #0a0a0f 0%, #12121a 100%);
 }
 
 body {
   @apply bg-background text-text-primary;
-  font-family: 'Geist', system-ui, sans-serif;
+  font-family: 'Poppins', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar - Bimoi themed */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
   @apply bg-surface;
+  border-radius: 100vw;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-border rounded-full;
+  background: linear-gradient(180deg, #78307D 0%, #B41F66 100%);
+  border-radius: 100vw;
+  border: 2px solid #12121a;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-text-muted;
+  background: linear-gradient(180deg, #B41F66 0%, #DF5738 100%);
 }
 
 /* Graph canvas background */
 .graph-container {
   background: 
-    radial-gradient(circle at center, rgba(230, 184, 61, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at center, rgba(180, 31, 102, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 70% 30%, rgba(120, 48, 125, 0.03) 0%, transparent 40%),
     linear-gradient(180deg, #0a0a0f 0%, #0d0d14 100%);
 }
 
@@ -73,8 +63,176 @@ body {
   position: absolute;
   inset: 0;
   background-image: 
-    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    linear-gradient(rgba(180, 31, 102, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(180, 31, 102, 0.02) 1px, transparent 1px);
   background-size: 50px 50px;
   pointer-events: none;
+}
+
+/* Glassmorphism effect - Bimoi style */
+.glass {
+  backdrop-filter: blur(25px) saturate(200%);
+  -webkit-backdrop-filter: blur(25px) saturate(200%);
+  background-color: rgba(17, 25, 40, 0.73);
+  border: 1px solid rgba(255, 255, 255, 0.125);
+}
+
+.glass-light {
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Bimoi Button Styles */
+.btn-bimoi {
+  @apply font-medium transition-all duration-300 ease-out;
+  background: var(--bimoi-gradient-button);
+  box-shadow: 0px 8px 15px rgba(180, 31, 102, 0.3);
+}
+
+.btn-bimoi:hover {
+  transform: translateY(-3px);
+  box-shadow: 0px 15px 20px rgba(180, 31, 102, 0.4);
+}
+
+.btn-bimoi:active {
+  transform: translateY(-1px);
+}
+
+/* Bimoi Outline Button */
+.btn-bimoi-outline {
+  @apply font-medium transition-all duration-300 ease-out;
+  background: transparent;
+  border: 2px solid #B41F66;
+  color: #B41F66;
+}
+
+.btn-bimoi-outline:hover {
+  background: #B41F66;
+  color: white;
+  transform: translateY(-3px);
+  box-shadow: 0px 15px 20px rgba(180, 31, 102, 0.4);
+}
+
+/* Bimoi Gold Accent Button */
+.btn-gold {
+  @apply font-medium transition-all duration-300 ease-out;
+  background: #FFB714;
+  color: #0a0a0f;
+  box-shadow: 0px 8px 15px rgba(255, 183, 20, 0.3);
+}
+
+.btn-gold:hover {
+  background: #e6a512;
+  transform: translateY(-3px);
+  box-shadow: 0px 15px 20px rgba(255, 183, 20, 0.4);
+}
+
+/* Bimoi Card Style */
+.card-bimoi {
+  @apply bg-surface-elevated border border-border rounded-2xl;
+  box-shadow: rgba(17, 17, 26, 0.1) 0px 4px 16px, 
+              rgba(17, 17, 26, 0.1) 0px 8px 24px;
+  transition: all 0.3s ease;
+}
+
+.card-bimoi:hover {
+  border-color: rgba(180, 31, 102, 0.3);
+  box-shadow: rgba(180, 31, 102, 0.1) 0px 4px 16px,
+              rgba(180, 31, 102, 0.1) 0px 8px 24px;
+}
+
+/* Bimoi Input Style */
+.input-bimoi {
+  @apply bg-surface border-2 border-border rounded-xl px-4 py-3;
+  @apply text-text-primary placeholder-text-muted;
+  @apply transition-all duration-300;
+  font-family: 'Poppins', sans-serif;
+}
+
+.input-bimoi:focus {
+  @apply outline-none border-accent-primary;
+  box-shadow: 0 0 0 3px rgba(180, 31, 102, 0.1);
+}
+
+/* Bimoi Text Gradient */
+.text-bimoi-gradient {
+  background: var(--bimoi-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Bimoi Glow Effect */
+.glow-bimoi {
+  box-shadow: 0 0 20px rgba(180, 31, 102, 0.3),
+              0 0 40px rgba(180, 31, 102, 0.1);
+}
+
+/* Animation for trust levels */
+.trust-pulse {
+  animation: trustPulse 2s ease-in-out infinite;
+}
+
+@keyframes trustPulse {
+  0%, 100% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Slide up animation for panels/modals */
+.slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Focus ring - Bimoi branded */
+.focus-ring-bimoi:focus {
+  @apply outline-none ring-2 ring-accent-primary ring-offset-2 ring-offset-background;
+}
+
+/* Tag/Chip style */
+.tag-bimoi {
+  @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium;
+  background: rgba(180, 31, 102, 0.1);
+  color: #B41F66;
+  border: 1px solid rgba(180, 31, 102, 0.2);
+}
+
+.tag-bimoi:hover {
+  background: rgba(180, 31, 102, 0.2);
+}
+
+/* Profile picture style */
+.avatar-bimoi {
+  @apply rounded-full overflow-hidden;
+  box-shadow: rgba(100, 100, 111, 0.3) 0px 7px 29px 0px;
+}
+
+/* Node highlight animation */
+@keyframes nodeHighlight {
+  0%, 100% {
+    filter: drop-shadow(0 0 8px rgba(180, 31, 102, 0.5));
+  }
+  50% {
+    filter: drop-shadow(0 0 16px rgba(180, 31, 102, 0.8));
+  }
+}
+
+.node-highlight {
+  animation: nodeHighlight 1.5s ease-in-out infinite;
 }

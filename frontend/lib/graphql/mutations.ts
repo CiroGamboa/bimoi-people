@@ -11,6 +11,9 @@ export const CREATE_PERSON = gql`
       seeks
       isUser
       createdAt
+      city
+      latitude
+      longitude
     }
   }
 `;
@@ -26,6 +29,9 @@ export const UPDATE_PERSON = gql`
       seeks
       isUser
       createdAt
+      city
+      latitude
+      longitude
     }
   }
 `;

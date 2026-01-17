@@ -38,23 +38,23 @@ export function TagInput({
   };
 
   return (
-    <div className={cn("space-y-1.5", className)}>
+    <div className={cn("space-y-2", className)}>
       {label && (
         <label className="block text-sm font-medium text-text-secondary">
           {label}
         </label>
       )}
-      <div className="flex flex-wrap gap-2 p-2 bg-surface border border-border rounded-lg min-h-[42px]">
+      <div className="flex flex-wrap gap-2 p-3 bg-surface border-2 border-border rounded-xl min-h-[52px] focus-within:border-bimoi-magenta focus-within:ring-4 focus-within:ring-bimoi-magenta/10 transition-all duration-300">
         {value.map((tag) => (
           <span
             key={tag}
-            className="inline-flex items-center gap-1 px-2 py-0.5 bg-surface-elevated text-text-secondary text-sm rounded-md"
+            className="tag-bimoi group cursor-pointer hover:bg-bimoi-magenta/20"
           >
             {tag}
             <button
               type="button"
               onClick={() => removeTag(tag)}
-              className="text-text-muted hover:text-text-primary transition-colors"
+              className="ml-1 text-bimoi-magenta/70 hover:text-bimoi-magenta transition-colors"
             >
               ×
             </button>
@@ -66,10 +66,10 @@ export function TagInput({
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={value.length === 0 ? placeholder : ""}
-          className="flex-1 min-w-[100px] bg-transparent text-text-primary placeholder:text-text-muted focus:outline-none text-sm"
+          className="flex-1 min-w-[100px] bg-transparent text-text-primary placeholder:text-text-muted focus:outline-none text-sm font-[Poppins]"
         />
       </div>
-      <p className="text-xs text-text-muted">Press Enter to add a tag</p>
+      <p className="text-xs text-text-muted font-medium">Press Enter to add a tag</p>
     </div>
   );
 }

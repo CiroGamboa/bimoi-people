@@ -19,7 +19,7 @@ async def clear_database():
 async def create_seed_data():
     """Create sample people and relationships."""
     async with driver.session() as session:
-        # Create people
+        # Create people with locations
         people = [
             {
                 "id": str(uuid.uuid4()),
@@ -28,7 +28,10 @@ async def create_seed_data():
                 "tags": ["product", "engineering", "startups"],
                 "offers": "Technical mentorship, product strategy, introductions to VCs",
                 "seeks": "Collaborators interested in social graph research",
-                "is_user": True
+                "is_user": True,
+                "city": "San Francisco, CA",
+                "latitude": 37.7749,
+                "longitude": -122.4194
             },
             {
                 "id": str(uuid.uuid4()),
@@ -37,7 +40,10 @@ async def create_seed_data():
                 "tags": ["engineering", "fintech", "python"],
                 "offers": "Technical architecture advice, code reviews",
                 "seeks": "Interesting side projects, angel investing opportunities",
-                "is_user": False
+                "is_user": False,
+                "city": "San Francisco, CA",
+                "latitude": 37.7749,
+                "longitude": -122.4194
             },
             {
                 "id": str(uuid.uuid4()),
@@ -46,7 +52,10 @@ async def create_seed_data():
                 "tags": ["design", "data-viz", "ux"],
                 "offers": "Design feedback, user research insights",
                 "seeks": "Complex visualization challenges",
-                "is_user": False
+                "is_user": False,
+                "city": "New York, NY",
+                "latitude": 40.7128,
+                "longitude": -74.0060
             },
             {
                 "id": str(uuid.uuid4()),
@@ -55,7 +64,10 @@ async def create_seed_data():
                 "tags": ["startups", "sales", "b2b"],
                 "offers": "Go-to-market strategy, sales playbooks",
                 "seeks": "Technical co-founders, enterprise connections",
-                "is_user": False
+                "is_user": False,
+                "city": "Austin, TX",
+                "latitude": 30.2672,
+                "longitude": -97.7431
             },
             {
                 "id": str(uuid.uuid4()),
@@ -64,7 +76,10 @@ async def create_seed_data():
                 "tags": ["vc", "startups", "investing"],
                 "offers": "Fundraising advice, portfolio introductions",
                 "seeks": "Promising pre-seed founders",
-                "is_user": False
+                "is_user": False,
+                "city": "Palo Alto, CA",
+                "latitude": 37.4419,
+                "longitude": -122.1430
             },
             {
                 "id": str(uuid.uuid4()),
@@ -73,7 +88,10 @@ async def create_seed_data():
                 "tags": ["data-science", "graphs", "machine-learning"],
                 "offers": "Graph algorithm expertise, ML consulting",
                 "seeks": "Interesting graph problems to solve",
-                "is_user": False
+                "is_user": False,
+                "city": "Seattle, WA",
+                "latitude": 47.6062,
+                "longitude": -122.3321
             },
             {
                 "id": str(uuid.uuid4()),
@@ -82,7 +100,10 @@ async def create_seed_data():
                 "tags": ["engineering", "management", "mentorship"],
                 "offers": "Career advice, interview prep, team scaling insights",
                 "seeks": "Diverse engineering talent to mentor",
-                "is_user": False
+                "is_user": False,
+                "city": "Mountain View, CA",
+                "latitude": 37.3861,
+                "longitude": -122.0839
             },
             # Second-degree connections (known by first-degree, not by user)
             {
@@ -92,7 +113,10 @@ async def create_seed_data():
                 "tags": ["startups", "entrepreneurship", "strategy"],
                 "offers": "Startup mentorship, investor introductions",
                 "seeks": "Interesting market opportunities",
-                "is_user": False
+                "is_user": False,
+                "city": "Los Angeles, CA",
+                "latitude": 34.0522,
+                "longitude": -118.2437
             },
             {
                 "id": str(uuid.uuid4()),
@@ -101,7 +125,10 @@ async def create_seed_data():
                 "tags": ["product", "growth", "strategy"],
                 "offers": "Product strategy, growth frameworks",
                 "seeks": "Ambitious product managers to hire",
-                "is_user": False
+                "is_user": False,
+                "city": "San Francisco, CA",
+                "latitude": 37.7749,
+                "longitude": -122.4194
             },
             {
                 "id": str(uuid.uuid4()),
@@ -110,7 +137,10 @@ async def create_seed_data():
                 "tags": ["engineering", "distributed-systems", "architecture"],
                 "offers": "System design reviews, architecture consulting",
                 "seeks": "Challenging technical problems",
-                "is_user": False
+                "is_user": False,
+                "city": "Seattle, WA",
+                "latitude": 47.6062,
+                "longitude": -122.3321
             },
             {
                 "id": str(uuid.uuid4()),
@@ -119,7 +149,10 @@ async def create_seed_data():
                 "tags": ["design", "agency", "branding"],
                 "offers": "Branding strategy, design team scaling",
                 "seeks": "Innovative tech startups to partner with",
-                "is_user": False
+                "is_user": False,
+                "city": "Brooklyn, NY",
+                "latitude": 40.6782,
+                "longitude": -73.9442
             },
             {
                 "id": str(uuid.uuid4()),
@@ -128,7 +161,10 @@ async def create_seed_data():
                 "tags": ["investing", "advisory", "fintech"],
                 "offers": "Angel investment, board experience",
                 "seeks": "Pre-seed fintech opportunities",
-                "is_user": False
+                "is_user": False,
+                "city": "Miami, FL",
+                "latitude": 25.7617,
+                "longitude": -80.1918
             },
             {
                 "id": str(uuid.uuid4()),
@@ -137,7 +173,10 @@ async def create_seed_data():
                 "tags": ["research", "ai", "graphs"],
                 "offers": "Academic collaboration, research insights",
                 "seeks": "Industry applications for graph research",
-                "is_user": False
+                "is_user": False,
+                "city": "Boston, MA",
+                "latitude": 42.3601,
+                "longitude": -71.0589
             },
         ]
         
@@ -153,13 +192,16 @@ async def create_seed_data():
                     offers: $offers,
                     seeks: $seeks,
                     is_user: $is_user,
-                    created_at: $created_at
+                    created_at: $created_at,
+                    city: $city,
+                    latitude: $latitude,
+                    longitude: $longitude
                 })
                 """,
                 **person,
                 created_at=datetime.now()
             )
-        print(f"✓ Created {len(people)} people")
+        print(f"✓ Created {len(people)} people with locations")
         
         # Create relationships
         # First, get IDs by name for easier relationship creation

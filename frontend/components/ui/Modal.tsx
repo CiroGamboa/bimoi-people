@@ -36,23 +36,24 @@ export function Modal({ isOpen, onClose, title, children, className }: ModalProp
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in"
+        className="absolute inset-0 bg-black/70 backdrop-blur-sm animate-fade-in"
         onClick={onClose}
       />
       
       {/* Modal content */}
       <div
         className={cn(
-          "relative z-10 w-full max-w-lg mx-4 bg-surface-elevated border border-border rounded-xl shadow-2xl animate-slide-in",
+          "relative z-10 w-full max-w-lg mx-4 bg-surface-elevated border border-border rounded-2xl shadow-2xl slide-up",
+          "card-bimoi",
           className
         )}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-          <h2 className="text-lg font-semibold text-text-primary">{title}</h2>
+        <div className="flex items-center justify-between px-6 py-5 border-b border-border">
+          <h2 className="text-xl font-semibold text-text-primary">{title}</h2>
           <button
             onClick={onClose}
-            className="p-1 text-text-muted hover:text-text-primary transition-colors rounded-lg hover:bg-surface"
+            className="p-2 text-text-muted hover:text-bimoi-magenta transition-all duration-200 rounded-full hover:bg-surface hover:rotate-90"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -72,7 +73,7 @@ export function Modal({ isOpen, onClose, title, children, className }: ModalProp
         </div>
         
         {/* Body */}
-        <div className="px-6 py-4 max-h-[70vh] overflow-y-auto">{children}</div>
+        <div className="px-6 py-5 max-h-[70vh] overflow-y-auto">{children}</div>
       </div>
     </div>
   );

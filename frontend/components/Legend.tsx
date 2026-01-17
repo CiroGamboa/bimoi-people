@@ -1,48 +1,56 @@
 "use client";
 
-import { getDegreeColor, getTrustColor } from "@/lib/utils";
+import { getDegreeColor, getTrustColor, getTrustLabel } from "@/lib/utils";
 
 export function Legend() {
   return (
-    <div className="bg-surface-elevated/80 backdrop-blur-sm border border-border rounded-xl p-4 space-y-4">
-      <h3 className="text-xs font-medium text-text-muted uppercase tracking-wide">
+    <div className="card-bimoi p-4 space-y-5">
+      <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider">
         Legend
       </h3>
 
       {/* Node degrees */}
-      <div className="space-y-2">
-        <span className="text-xs text-text-secondary">Connection Degree</span>
-        <div className="space-y-1.5">
+      <div className="space-y-3">
+        <span className="text-xs text-text-secondary font-medium">Connection Degree</span>
+        <div className="space-y-2">
           {[
             { degree: 0, label: "You" },
             { degree: 1, label: "1st degree (direct)" },
             { degree: 2, label: "2nd degree (friend of friend)" },
           ].map(({ degree, label }) => (
-            <div key={degree} className="flex items-center gap-2">
+            <div key={degree} className="flex items-center gap-3 group">
               <div
-                className="w-4 h-4 rounded-full"
-                style={{ backgroundColor: getDegreeColor(degree) }}
+                className="w-5 h-5 rounded-full transition-all duration-300 group-hover:scale-110"
+                style={{ 
+                  backgroundColor: getDegreeColor(degree),
+                  boxShadow: `0 0 10px ${getDegreeColor(degree)}40`
+                }}
               />
-              <span className="text-xs text-text-secondary">{label}</span>
+              <span className="text-xs text-text-secondary group-hover:text-text-primary transition-colors">
+                {label}
+              </span>
             </div>
           ))}
         </div>
       </div>
 
       {/* Trust levels */}
-      <div className="space-y-2">
-        <span className="text-xs text-text-secondary">Trust Level</span>
-        <div className="flex gap-1">
+      <div className="space-y-3">
+        <span className="text-xs text-text-secondary font-medium">Trust Level</span>
+        <div className="flex gap-1.5">
           {[1, 2, 3, 4, 5].map((level) => (
             <div
               key={level}
-              className="flex-1 h-2 rounded"
-              style={{ backgroundColor: getTrustColor(level) }}
-              title={`Trust level ${level}`}
+              className="flex-1 h-3 rounded-full transition-all duration-300 hover:scale-110 cursor-pointer"
+              style={{ 
+                backgroundColor: getTrustColor(level),
+                boxShadow: `0 2px 8px ${getTrustColor(level)}30`
+              }}
+              title={`${level}/5 - ${getTrustLabel(level)}`}
             />
           ))}
         </div>
-        <div className="flex justify-between text-xs text-text-muted">
+        <div className="flex justify-between text-xs text-text-muted font-medium">
           <span>Low</span>
           <span>Deep</span>
         </div>

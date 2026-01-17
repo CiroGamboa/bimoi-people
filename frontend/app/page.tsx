@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { useQuery } from "@apollo/client";
 import { NetworkGraph } from "@/components/graph";
+import { ContactsMap } from "@/components/map";
 import { PersonPanel, PersonForm, ConnectionForm } from "@/components/people";
 import { FilterBar } from "@/components/FilterBar";
 import { Header } from "@/components/Header";
 import { Legend } from "@/components/Legend";
+import { ViewMode } from "@/components/ViewToggle";
 import { GET_GRAPH, GET_PERSON } from "@/lib/graphql/queries";
 
 interface GraphNode {
@@ -15,6 +17,9 @@ interface GraphNode {
   tags: string[];
   isUser: boolean;
   degree: number;
+  city?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 interface GraphEdge {
@@ -33,6 +38,20 @@ export default function Home() {
   const [isAddPersonOpen, setIsAddPersonOpen] = useState(false);
   const [isConnectionFormOpen, setIsConnectionFormOpen] = useState(false);
   const [connectionFormMode, setConnectionFormMode] = useState<"create" | "edit">("create");
+  const [viewMode, setViewMode] = useState<ViewMode>("graph");
+
+  // Persist view mode preference
+  useEffect(() => {
+    const saved = localStorage.getItem("bimoi-view-mode");
+    if (saved === "graph" || saved === "map") {
+      setViewMode(saved);
+    }
+  }, []);
+
+  const handleViewModeChange = useCallback((mode: ViewMode) => {
+    setViewMode(mode);
+    localStorage.setItem("bimoi-view-mode", mode);
+  }, []);
 
   // Queries
   const { data: graphData, loading: graphLoading } = useQuery(GET_GRAPH, {
@@ -114,11 +133,15 @@ export default function Home() {
 
   return (
     <div className="h-screen flex flex-col bg-background">
-      <Header onAddPerson={() => setIsAddPersonOpen(true)} />
+      <Header 
+        onAddPerson={() => setIsAddPersonOpen(true)} 
+        viewMode={viewMode}
+        onViewModeChange={handleViewModeChange}
+      />
 
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar */}
-        <aside className="w-72 border-r border-border p-4 space-y-4 overflow-y-auto">
+        <aside className="w-80 border-r border-border p-5 space-y-5 overflow-y-auto bg-surface/30">
           <FilterBar
             availableTags={availableTags}
             selectedTags={selectedTags}
@@ -127,28 +150,44 @@ export default function Home() {
           <Legend />
           
           {/* Stats */}
-          <div className="bg-surface-elevated border border-border rounded-xl p-4">
-            <h3 className="text-xs font-medium text-text-muted uppercase tracking-wide mb-3">
+          <div className="card-bimoi p-5">
+            <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">
               Network Stats
             </h3>
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-text-secondary">Total People</span>
-                <span className="font-mono text-text-primary">{nodes.length}</span>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-text-secondary text-sm font-medium">Total People</span>
+                <span className="font-mono text-text-primary bg-surface px-2 py-1 rounded-lg">
+                  {nodes.length}
+                </span>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-text-secondary">Connections</span>
-                <span className="font-mono text-text-primary">{edges.length}</span>
+              <div className="flex justify-between items-center">
+                <span className="text-text-secondary text-sm font-medium">Connections</span>
+                <span className="font-mono text-text-primary bg-surface px-2 py-1 rounded-lg">
+                  {edges.length}
+                </span>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-text-secondary">1st Degree</span>
-                <span className="font-mono text-text-primary">
+              <div className="flex justify-between items-center">
+                <span className="text-text-secondary text-sm font-medium">1st Degree</span>
+                <span 
+                  className="font-mono px-2 py-1 rounded-lg"
+                  style={{ 
+                    color: '#B41F66',
+                    backgroundColor: 'rgba(180, 31, 102, 0.1)'
+                  }}
+                >
                   {nodes.filter((n: GraphNode) => n.degree === 1).length}
                 </span>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-text-secondary">2nd Degree</span>
-                <span className="font-mono text-text-primary">
+              <div className="flex justify-between items-center">
+                <span className="text-text-secondary text-sm font-medium">2nd Degree</span>
+                <span 
+                  className="font-mono px-2 py-1 rounded-lg"
+                  style={{ 
+                    color: '#78307D',
+                    backgroundColor: 'rgba(120, 48, 125, 0.1)'
+                  }}
+                >
                   {nodes.filter((n: GraphNode) => n.degree === 2).length}
                 </span>
               </div>
@@ -160,48 +199,38 @@ export default function Home() {
         <main className="flex-1 relative">
           {graphLoading ? (
             <div className="flex items-center justify-center h-full">
-              <div className="text-center space-y-3">
-                <div className="w-8 h-8 border-2 border-accent-primary border-t-transparent rounded-full animate-spin mx-auto" />
-                <p className="text-text-muted text-sm">Loading graph...</p>
+              <div className="text-center space-y-4">
+                <div className="w-12 h-12 border-3 border-bimoi-magenta border-t-transparent rounded-full animate-spin mx-auto" 
+                     style={{ borderWidth: '3px' }} />
+                <p className="text-text-muted text-sm font-medium">Loading your network...</p>
               </div>
             </div>
           ) : nodes.length === 0 ? (
             <div className="flex items-center justify-center h-full">
-              <div className="text-center space-y-4 max-w-md">
-                <div className="w-16 h-16 rounded-full bg-surface-elevated border border-border flex items-center justify-center mx-auto">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="32"
-                    height="32"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    className="text-text-muted"
-                  >
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                    <circle cx="9" cy="7" r="4" />
-                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                  </svg>
+              <div className="text-center space-y-6 max-w-md px-6">
+                {/* Bimoi Logo */}
+                <div className="w-24 h-24 mx-auto glow-bimoi rounded-full flex items-center justify-center bg-surface-elevated border border-border">
+                  <img src="/bimoi-logo.svg" alt="Bimoi" className="w-16 h-16" />
                 </div>
+                
                 <div>
-                  <h2 className="text-lg font-semibold text-text-primary mb-1">
-                    Your graph is empty
+                  <h2 className="text-2xl font-bold text-bimoi-gradient mb-2">
+                    Welcome to Bimoi
                   </h2>
-                  <p className="text-text-secondary text-sm">
-                    Start by adding yourself, then add the people you know and
-                    the connections between them.
+                  <p className="text-text-secondary text-sm leading-relaxed">
+                    Your personal social graph is empty. Start by adding yourself, 
+                    then add the people you know and map the connections between them.
                   </p>
                 </div>
+                
                 <button
                   onClick={() => setIsAddPersonOpen(true)}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-accent-primary text-background rounded-lg font-medium hover:bg-accent-primary/90 transition-colors"
+                  className="btn-bimoi inline-flex items-center gap-2 px-6 py-3 rounded-full text-white font-semibold"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
+                    width="18"
+                    height="18"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
@@ -214,7 +243,7 @@ export default function Home() {
                 </button>
               </div>
             </div>
-          ) : (
+          ) : viewMode === "graph" ? (
             <NetworkGraph
               nodes={nodes}
               edges={edges}
@@ -223,19 +252,25 @@ export default function Home() {
               selectedNodeId={selectedNodeId}
               highlightedTags={selectedTags}
             />
+          ) : (
+            <ContactsMap
+              nodes={nodes}
+              onNodeClick={handleNodeClick}
+              selectedNodeId={selectedNodeId}
+            />
           )}
 
           {/* Quick actions floating button for connecting */}
           {selectedNodeId && personData?.person && !personData.person.isUser && !selectedConnection && (
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10">
+            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10">
               <button
                 onClick={handleCreateConnection}
-                className="flex items-center gap-2 px-4 py-2 bg-accent-secondary text-white rounded-full shadow-lg hover:bg-accent-secondary/90 transition-colors"
+                className="btn-bimoi flex items-center gap-2 px-5 py-3 rounded-full text-white font-semibold"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
+                  width="18"
+                  height="18"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -252,7 +287,7 @@ export default function Home() {
 
         {/* Person Panel */}
         {selectedNodeId && personData?.person && (
-          <aside className="w-80">
+          <aside className="w-96">
             <PersonPanel
               person={{ ...personData.person, degree: nodes.find((n: GraphNode) => n.id === selectedNodeId)?.degree }}
               connection={selectedConnection}

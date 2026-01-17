@@ -23,7 +23,10 @@ class GraphService:
             offers=record.get("offers"),
             seeks=record.get("seeks"),
             is_user=record.get("is_user", False),
-            created_at=record.get("created_at", datetime.now())
+            created_at=record.get("created_at", datetime.now()),
+            city=record.get("city"),
+            latitude=record.get("latitude"),
+            longitude=record.get("longitude")
         )
     
     async def get_user(self) -> Optional[Person]:
@@ -33,7 +36,8 @@ class GraphService:
                 """
                 MATCH (p:Person {is_user: true})
                 RETURN p {
-                    .id, .name, .bio, .tags, .offers, .seeks, .is_user, .created_at
+                    .id, .name, .bio, .tags, .offers, .seeks, .is_user, .created_at,
+                    .city, .latitude, .longitude
                 } as person
                 """
             )
@@ -49,7 +53,8 @@ class GraphService:
                 """
                 MATCH (p:Person {id: $id})
                 RETURN p {
-                    .id, .name, .bio, .tags, .offers, .seeks, .is_user, .created_at
+                    .id, .name, .bio, .tags, .offers, .seeks, .is_user, .created_at,
+                    .city, .latitude, .longitude
                 } as person
                 """,
                 id=person_id
@@ -68,7 +73,8 @@ class GraphService:
                     MATCH (p:Person)
                     WHERE any(tag IN $tags WHERE tag IN p.tags)
                     RETURN p {
-                        .id, .name, .bio, .tags, .offers, .seeks, .is_user, .created_at
+                        .id, .name, .bio, .tags, .offers, .seeks, .is_user, .created_at,
+                        .city, .latitude, .longitude
                     } as person
                     ORDER BY p.name
                     """,
@@ -79,7 +85,8 @@ class GraphService:
                     """
                     MATCH (p:Person)
                     RETURN p {
-                        .id, .name, .bio, .tags, .offers, .seeks, .is_user, .created_at
+                        .id, .name, .bio, .tags, .offers, .seeks, .is_user, .created_at,
+                        .city, .latitude, .longitude
                     } as person
                     ORDER BY p.name
                     """
@@ -94,7 +101,8 @@ class GraphService:
                 """
                 MATCH (p:Person {id: $id})-[r:KNOWS]-(other:Person)
                 RETURN other {
-                    .id, .name, .bio, .tags, .offers, .seeks, .is_user, .created_at
+                    .id, .name, .bio, .tags, .offers, .seeks, .is_user, .created_at,
+                    .city, .latitude, .longitude
                 } as person,
                 r {
                     .id, .since, .trust_level, .context, .notes
@@ -126,10 +134,12 @@ class GraphService:
                 MATCH (me:Person {id: $id})-[:KNOWS]-(friend:Person)-[:KNOWS]-(fof:Person)
                 WHERE me <> fof AND NOT (me)-[:KNOWS]-(fof)
                 RETURN DISTINCT fof {
-                    .id, .name, .bio, .tags, .offers, .seeks, .is_user, .created_at
+                    .id, .name, .bio, .tags, .offers, .seeks, .is_user, .created_at,
+                    .city, .latitude, .longitude
                 } as person,
                 friend {
-                    .id, .name, .bio, .tags, .offers, .seeks, .is_user, .created_at
+                    .id, .name, .bio, .tags, .offers, .seeks, .is_user, .created_at,
+                    .city, .latitude, .longitude
                 } as connected_via
                 ORDER BY fof.name
                 """,
@@ -178,11 +188,15 @@ class GraphService:
                         conn.person.name as name,
                         conn.person.tags as tags,
                         conn.person.is_user as is_user,
-                        conn.degree as degree
+                        conn.degree as degree,
+                        conn.person.city as city,
+                        conn.person.latitude as latitude,
+                        conn.person.longitude as longitude
                     UNION
                     MATCH (user:Person {is_user: true})
                     RETURN user.id as id, user.name as name, user.tags as tags, 
-                           true as is_user, 0 as degree
+                           true as is_user, 0 as degree,
+                           user.city as city, user.latitude as latitude, user.longitude as longitude
                     """,
                     depth=depth
                 )
@@ -193,7 +207,8 @@ class GraphService:
                     MATCH (p:Person)
                     RETURN p.id as id, p.name as name, p.tags as tags, 
                            p.is_user as is_user, 
-                           CASE WHEN p.is_user THEN 0 ELSE 1 END as degree
+                           CASE WHEN p.is_user THEN 0 ELSE 1 END as degree,
+                           p.city as city, p.latitude as latitude, p.longitude as longitude
                     """
                 )
             
@@ -204,7 +219,10 @@ class GraphService:
                     name=r["name"],
                     tags=r.get("tags", []),
                     is_user=r.get("is_user", False),
-                    degree=r.get("degree", 1)
+                    degree=r.get("degree", 1),
+                    city=r.get("city"),
+                    latitude=r.get("latitude"),
+                    longitude=r.get("longitude")
                 )
                 for r in nodes_records if r["id"]
             ]
@@ -253,10 +271,14 @@ class GraphService:
                     offers: $offers,
                     seeks: $seeks,
                     is_user: false,
-                    created_at: $created_at
+                    created_at: $created_at,
+                    city: $city,
+                    latitude: $latitude,
+                    longitude: $longitude
                 })
                 RETURN p {
-                    .id, .name, .bio, .tags, .offers, .seeks, .is_user, .created_at
+                    .id, .name, .bio, .tags, .offers, .seeks, .is_user, .created_at,
+                    .city, .latitude, .longitude
                 } as person
                 """,
                 id=person_id,
@@ -265,7 +287,10 @@ class GraphService:
                 tags=input.tags,
                 offers=input.offers,
                 seeks=input.seeks,
-                created_at=created_at
+                created_at=created_at,
+                city=input.city,
+                latitude=input.latitude,
+                longitude=input.longitude
             )
             record = await result.single()
             return self._record_to_person(record["person"])
@@ -280,9 +305,13 @@ class GraphService:
                     p.bio = $bio,
                     p.tags = $tags,
                     p.offers = $offers,
-                    p.seeks = $seeks
+                    p.seeks = $seeks,
+                    p.city = $city,
+                    p.latitude = $latitude,
+                    p.longitude = $longitude
                 RETURN p {
-                    .id, .name, .bio, .tags, .offers, .seeks, .is_user, .created_at
+                    .id, .name, .bio, .tags, .offers, .seeks, .is_user, .created_at,
+                    .city, .latitude, .longitude
                 } as person
                 """,
                 id=person_id,
@@ -290,7 +319,10 @@ class GraphService:
                 bio=input.bio,
                 tags=input.tags,
                 offers=input.offers,
-                seeks=input.seeks
+                seeks=input.seeks,
+                city=input.city,
+                latitude=input.latitude,
+                longitude=input.longitude
             )
             record = await result.single()
             if record:
@@ -327,7 +359,8 @@ class GraphService:
                 MATCH (p:Person {id: $id})
                 SET p.is_user = true
                 RETURN p {
-                    .id, .name, .bio, .tags, .offers, .seeks, .is_user, .created_at
+                    .id, .name, .bio, .tags, .offers, .seeks, .is_user, .created_at,
+                    .city, .latitude, .longitude
                 } as person
                 """,
                 id=person_id
@@ -358,7 +391,8 @@ class GraphService:
                     notes: $notes
                 }]->(b)
                 RETURN b {
-                    .id, .name, .bio, .tags, .offers, .seeks, .is_user, .created_at
+                    .id, .name, .bio, .tags, .offers, .seeks, .is_user, .created_at,
+                    .city, .latitude, .longitude
                 } as person,
                 r {
                     .id, .since, .trust_level, .context, .notes
@@ -401,7 +435,8 @@ class GraphService:
                     r.context = $context,
                     r.notes = $notes
                 RETURN b {
-                    .id, .name, .bio, .tags, .offers, .seeks, .is_user, .created_at
+                    .id, .name, .bio, .tags, .offers, .seeks, .is_user, .created_at,
+                    .city, .latitude, .longitude
                 } as person,
                 r {
                     .id, .since, .trust_level, .context, .notes

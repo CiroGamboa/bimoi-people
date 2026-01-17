@@ -24,10 +24,14 @@ Bimoi is an experimental platform designed to explore, model, and understand hum
 - Docker and Docker Compose
 - Node.js 20+ (for local frontend development)
 - Python 3.11+ (for local backend development)
+- Google Maps API Key (optional, for map view feature)
 
 ### Running with Docker
 
 ```bash
+# (Optional) Set Google Maps API key for map view
+export GOOGLE_MAPS_API_KEY=your_api_key_here
+
 # Start all services
 docker compose up
 
@@ -35,9 +39,11 @@ docker compose up
 docker compose exec backend python -m app.seed
 ```
 
+> **Note**: To enable the map view feature, you need a Google Maps API key with Maps JavaScript API and Places API enabled. Get one at https://console.cloud.google.com/apis/credentials
+
 Access the application:
 - **Frontend**: http://localhost:3000
-- **GraphQL Playground**: http://localhost:8000/graphql
+- **GraphQL Playground**: http://localhost:8888/graphql
 - **Neo4j Browser**: http://localhost:7474 (user: neo4j, password: bimoi_dev_password)
 
 ### Local Development
@@ -60,7 +66,7 @@ export NEO4J_USER=neo4j
 export NEO4J_PASSWORD=bimoi_dev_password
 
 # Run the server
-uvicorn app.main:app --reload --port 8000
+uvicorn app.main:app --reload --port 8888
 
 # Seed the database
 python -m app.seed
@@ -178,6 +184,9 @@ mutation {
 | tags | String[] | Skills, industries, interests |
 | offers | String? | What they can provide |
 | seeks | String? | What they're looking for |
+| city | String? | Location city name |
+| latitude | Float? | Location latitude |
+| longitude | Float? | Location longitude |
 | is_user | Boolean | Marks the graph owner |
 | created_at | DateTime | When added |
 
@@ -194,10 +203,13 @@ mutation {
 ## Features
 
 - **Interactive Graph Visualization**: Explore your network visually with drag, zoom, and click interactions
+- **Geographic Map View**: See your contacts on a world map, positioned by their city location
+- **View Toggle**: Switch between graph and map views to explore your network differently
 - **First & Second Degree Connections**: See direct contacts and friends-of-friends
 - **Trust Levels**: Rate relationships from 1-5 to highlight your closest connections
 - **Relationship Context**: Record how you know someone and why they matter
 - **Tag-based Filtering**: Filter your network by skills, industries, or interests
+- **Location Autocomplete**: Add city locations with Google Places autocomplete
 - **Profile Cards**: View what each person offers and seeks
 
 ## Project Structure
@@ -217,7 +229,8 @@ bimoi-people/
 ├── frontend/
 │   ├── app/                  # Next.js app router
 │   ├── components/
-│   │   ├── graph/            # Network visualization
+│   │   ├── graph/            # Network graph visualization
+│   │   ├── map/              # Geographic map view
 │   │   ├── people/           # Person and connection forms
 │   │   └── ui/               # Reusable UI components
 │   ├── lib/
